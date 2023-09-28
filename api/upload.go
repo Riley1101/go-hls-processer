@@ -7,7 +7,7 @@ import (
 	"net/http"
 	config "vid/config"
 	src "vid/src"
-
+    utils "vid/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -31,10 +31,9 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	src.ValidateDir("uploads")
-	src.ValidateFileType(multipart_file, w)
-
+	// src.ValidateFileType(multipart_file, w)
 	file.Upload(multipart_file)
+	utils.CreateHLS(&file, 10)
 	fmt.Fprintf(w, "Successfully Uploaded File at %s\n", file.Path)
-	defer multipart_file.Close()
 
 }

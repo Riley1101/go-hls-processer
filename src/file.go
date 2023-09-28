@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
@@ -24,11 +25,14 @@ type File struct {
 	Header       string
 	Path         string
 	OriginalName string
+	Processed    bool `default:"false"`
+	ProcessedDir string
 }
 
 func (f *File) Upload(file multipart.File) error {
 	f.Path = "uploads/"
 	newFileName := time.Now().UnixNano()
+	f.Filename = fmt.Sprint(newFileName)
 	f.Path = fmt.Sprintf("%s%d%s", f.Path, newFileName, filepath.Ext(f.OriginalName))
 	dst, err := os.Create(fmt.Sprintf("uploads/%d%s", newFileName, filepath.Ext(f.OriginalName)))
 	if err != nil {
@@ -36,8 +40,12 @@ func (f *File) Upload(file multipart.File) error {
 			"error", err,
 		)
 	}
-
 	defer dst.Close()
+
+	_, err = io.Copy(dst, file)
+	if err != nil {
+		return nil
+	}
 	return nil
 }
 
