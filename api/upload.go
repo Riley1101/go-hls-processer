@@ -65,7 +65,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request, q *utils.Pool) {
 	src.ValidateDir("uploads")
 	file.Upload(multipart_file)
 	job := utils.Job{
-		Name:      file.OriginalName,
+		Name:      file.Filename,
 		Completed: false,
 		Action: func() error {
 			ffmpeg.CreateHLS(&file, 10)
