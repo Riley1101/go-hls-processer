@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 )
@@ -17,7 +18,8 @@ func (j Job) GetName() string {
 }
 
 func (j Job) Run() error {
-	slog.Info("========== Running job %s \n ======>", j.Name)
+	msg := fmt.Sprintf("========== Running job %s \n ======>", j.Name)
+	slog.Info(msg)
 	err := j.Action()
 	if err != nil {
 		log.Print(err)

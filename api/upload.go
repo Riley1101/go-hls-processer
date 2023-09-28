@@ -24,7 +24,6 @@ func UploadRoutes(r *mux.Router, db *sql.DB, pool *utils.Pool) {
 }
 
 func alphabets(name string) error {
-	slog.Info("Alphabets %s", name)
 	return nil
 }
 
