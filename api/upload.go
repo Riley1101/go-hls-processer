@@ -17,19 +17,24 @@ func UploadRoutes(r *mux.Router, db *sql.DB) {
 
 func handleUpload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(10 << 20)
+
 	multipart_file, file_headers, err := r.FormFile("file")
+	if err != nil {
+		slog.Error("Error Retrieving the File")
+		return
+	}
+
 	file := src.File{
 		OriginalName: file_headers.Filename,
 		Size:         file_headers.Size,
 		Header:       file_headers.Header.Get("Content-Type"),
 	}
-	err = src.ValidateDir("uploads")
+
+	src.ValidateDir("uploads")
+	src.ValidateFileType(multipart_file, w)
+
 	file.Upload(multipart_file)
-	if err != nil {
-		slog.Error("Error Retrieving the File")
-		return
-	}
+	fmt.Fprintf(w, "Successfully Uploaded File at %s\n", file.Path)
 	defer multipart_file.Close()
-	fmt.Fprintf(w, "File Uploaded Successfully")
 
 }

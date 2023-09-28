@@ -17,5 +17,4 @@ func main() {
 	r := mux.NewRouter()
 	api.UploadRoutes(r, con)
 	http.ListenAndServe(":5173", r)
-
 }
