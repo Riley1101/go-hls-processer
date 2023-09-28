@@ -1,5 +1,7 @@
 package utils
 
+import "log/slog"
+
 type Pool struct {
 	Workers  *[]Worker
 	MAX_SIZE int
@@ -12,11 +14,12 @@ func NewPool(size int) *Pool {
 	}
 }
 
-func (p *Pool) AddWorker(worker Worker) {
+func (p *Pool) AddWorker(worker *Worker) {
 	if len(*p.Workers) == p.MAX_SIZE {
+		slog.Warn("Pool is full")
 		return
 	}
-	*p.Workers = append(*p.Workers, worker)
+	*p.Workers = append(*p.Workers, *worker)
 }
 
 func (p *Pool) Start() {

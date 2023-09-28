@@ -3,9 +3,9 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	uuid "github.com/google/uuid"
 	"log/slog"
 	"net/http"
-	"time"
 	config "vid/config"
 	src "vid/src"
 	ffmpeg "vid/utils/ffmpeg"
@@ -24,11 +24,8 @@ func UploadRoutes(r *mux.Router, db *sql.DB, pool *utils.Pool) {
 	})).Methods("GET")
 }
 
-func alphabets() error {
-	for i := 'a'; i <= 'e'; i++ {
-		time.Sleep(1000 * time.Millisecond)
-		fmt.Printf("%c ", i)
-	}
+func alphabets(name string) error {
+	slog.Info("Alphabets %s", name)
 	return nil
 }
 
@@ -36,9 +33,26 @@ func doWork(pool *utils.Pool) {
 	pool.Start()
 }
 
-func handleGet(w http.ResponseWriter, r *http.Request, q *utils.Pool) {
-	fmt.Fprintf(w, "Job added to queue")
+func handleGet(w http.ResponseWriter, r *http.Request, p *utils.Pool) {
 
+	queueName := r.URL.Hostname()
+	queue := utils.NewQueue(queueName, p.MAX_SIZE)
+	jobs := []utils.Job{}
+	for i := 0; i < 10; i++ {
+		job := utils.Job{
+			Name: uuid.New().String(),
+			Action: func() error {
+				var uuid string = uuid.New().String()
+				return alphabets(uuid)
+			},
+		}
+		jobs = append(jobs, job)
+	}
+	queue.AddJobs(jobs)
+	defaultWorker := utils.NewWorker(queue)
+	p.AddWorker(defaultWorker)
+	p.Start()
+	fmt.Fprintf(w, "Job added to queue")
 }
 
 func handleUpload(w http.ResponseWriter, r *http.Request, q *utils.Pool) {

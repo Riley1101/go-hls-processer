@@ -19,7 +19,8 @@ func main() {
 	queue := jobqueue.NewQueue("main", MAX_WORKERS)
 	defaultWorker := jobqueue.NewWorker(queue)
 	pool := jobqueue.NewPool(MAX_WORKERS)
-
+	pool.AddWorker(defaultWorker)
 	api.UploadRoutes(r, con, pool)
+
 	http.ListenAndServe(":5173", r)
 }
