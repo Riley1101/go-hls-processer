@@ -17,6 +17,7 @@ func (j Job) GetName() string {
 }
 
 func (j Job) Run() error {
+	slog.Info("========== Running job %s \n ======>", j.Name)
 	err := j.Action()
 	if err != nil {
 		log.Print(err)

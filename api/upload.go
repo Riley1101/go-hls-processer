@@ -4,14 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	uuid "github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	config "vid/config"
 	src "vid/src"
 	ffmpeg "vid/utils/ffmpeg"
 	utils "vid/utils/jobqueue"
-
-	"github.com/gorilla/mux"
 )
 
 func UploadRoutes(r *mux.Router, db *sql.DB, pool *utils.Pool) {
@@ -29,12 +28,7 @@ func alphabets(name string) error {
 	return nil
 }
 
-func doWork(pool *utils.Pool) {
-	pool.Start()
-}
-
 func handleGet(w http.ResponseWriter, r *http.Request, p *utils.Pool) {
-
 	queueName := r.URL.Hostname()
 	queue := utils.NewQueue(queueName, p.MAX_SIZE)
 	jobs := []utils.Job{}
@@ -68,10 +62,22 @@ func handleUpload(w http.ResponseWriter, r *http.Request, q *utils.Pool) {
 		Size:         file_headers.Size,
 		Header:       file_headers.Header.Get("Content-Type"),
 	}
-
 	src.ValidateDir("uploads")
 	file.Upload(multipart_file)
-	ffmpeg.CreateHLS(&file, 10)
+	job := utils.Job{
+		Name:      file.OriginalName,
+		Completed: false,
+		Action: func() error {
+			ffmpeg.CreateHLS(&file, 10)
+			return nil
+		},
+	}
+	queueName := r.URL.Hostname()
+	queue := utils.NewQueue(queueName, q.MAX_SIZE)
+	queue.AddJob(job)
+	defaultWorker := utils.NewWorker(queue)
+	q.AddWorker(defaultWorker)
+	q.Start()
 	fmt.Fprintf(w, "Successfully Uploaded File at %s\n", file.Path)
 
 }
