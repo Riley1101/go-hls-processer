@@ -7,6 +7,7 @@ import (
 	api "vid/api"
 	config "vid/config"
 	jobqueue "vid/utils/jobqueue"
+	web "vid/website"
 )
 
 func main() {
@@ -16,11 +17,17 @@ func main() {
 	con, _ := db.Connect()
 	r := mux.NewRouter()
 	MAX_WORKERS := 5
-	queue := jobqueue.NewQueue("main", MAX_WORKERS)
-	defaultWorker := jobqueue.NewWorker(queue)
 	pool := jobqueue.NewPool(MAX_WORKERS)
-	pool.AddWorker(defaultWorker)
+	web.WebRoutes(r)
 	api.UploadRoutes(r, con, pool)
 
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./processed/")))
 	http.ListenAndServe(":5173", r)
+}
+
+func addHeaders(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		h.ServeHTTP(w, r)
+	}
 }

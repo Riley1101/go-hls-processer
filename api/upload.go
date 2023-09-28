@@ -14,11 +14,11 @@ import (
 )
 
 func UploadRoutes(r *mux.Router, db *sql.DB, pool *utils.Pool) {
-	r.HandleFunc("/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handleUpload(w, r, pool)
 	})).Methods("POST")
 
-	r.HandleFunc("/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		handleGet(w, r, pool)
 	})).Methods("GET")
 }
