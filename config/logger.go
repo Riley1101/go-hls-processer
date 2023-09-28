@@ -7,10 +7,27 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 )
 
-func InitLogger() *slog.Logger {
+func WithLogMiddleware(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("INCOMING REQUEST",
+			slog.String("URL", r.URL.Path),
+			slog.String("Method", r.Method),
+			//		slog.String("Adr", r.RemoteAddr),
+		)
+		f(w, r)
+	}
+}
+
+func InitLogger() {
+	logger := CreateLogger()
+	slog.SetDefault(logger)
+}
+
+func CreateLogger() *slog.Logger {
 	opts := PrettyHandlerOptions{
 		SlogOpts: slog.HandlerOptions{
 			Level: slog.LevelDebug,

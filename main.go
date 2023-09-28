@@ -1,21 +1,21 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"log/slog"
 	"net/http"
 	api "vid/api"
 	config "vid/config"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	logger := config.InitLogger()
-	logger.Info(
-		"Server Listening on port 5173",
-	)
-	r := mux.NewRouter()
+	config.InitLogger()
+	slog.Info("Server started", "port", 5173)
 	db := config.DB{}
 	con, _ := db.Connect()
+	r := mux.NewRouter()
 	api.UploadRoutes(r, con)
-	http.ListenAndServe(":5173", nil)
+	http.ListenAndServe(":5173", r)
 
 }
