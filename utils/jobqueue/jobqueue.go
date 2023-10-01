@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+    
 )
 
 type Job struct {
 	Name      string
 	Completed bool `default:"false"`
-	Action    func() error
+    Action    func() error
 }
 
 func (j Job) GetName() string {
@@ -29,7 +30,7 @@ func (j Job) Run() error {
 }
 
 type Queue struct {
-	MAX_SIZE int `default:"2"`
+	MAX_SIZE int `default:"4"`
 	name     string
 	length   int
 	jobs     chan Job

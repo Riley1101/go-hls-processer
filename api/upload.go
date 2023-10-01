@@ -63,17 +63,33 @@ func handleUpload(w http.ResponseWriter, r *http.Request, q *utils.Pool) {
 	}
 	src.ValidateDir("uploads")
 	file.Upload(multipart_file)
-	job := utils.Job{
-		Name:      file.Filename,
-		Completed: false,
-		Action: func() error {
-			ffmpeg.CreateHLS(&file, 10)
+	jobs := []utils.Job{}
+
+	for _, resolution := range []ffmpeg.VideoResolution{ffmpeg.LOW, ffmpeg.MID, ffmpeg.HIGH} {
+		video := ffmpeg.NewVideo(&file, resolution)
+		newAction := func() error {
+			fmt.Println("Creating HLS for inside function", resolution)
+			fmt.Println("Video", video)
+			video.CreateHLS(resolution)
 			return nil
-		},
+		}
+		job := utils.Job{
+			Name:      file.Filename,
+			Completed: false,
+			Action: func() error {
+				newAction()
+				return nil
+			},
+		}
+		jobs = append(jobs, job)
 	}
+
+	// print all jobs
+
 	queueName := r.URL.Hostname()
 	queue := utils.NewQueue(queueName, q.MAX_SIZE)
-	queue.AddJob(job)
+	queue.AddJobs(jobs)
+
 	defaultWorker := utils.NewWorker(queue)
 	q.AddWorker(defaultWorker)
 	q.Start()
