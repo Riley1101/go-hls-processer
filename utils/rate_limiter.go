@@ -30,6 +30,5 @@ func LimitRate(user_id string, interval_in_seconds int64, maximumRequests int64)
 		return false
 	}
 	redisClient.Incr(ctx, user_id+":"+currentWindow)
-	redisClient.Expire(ctx, user_id+":"+currentWindow, time.Duration(interval_in_seconds)*time.Second)
 	return true
 }

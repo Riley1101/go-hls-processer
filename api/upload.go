@@ -16,14 +16,24 @@ import (
 
 func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
 	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
+
+		request_id := r.Header.Get("X-Request-Id")
+		limit := rate_limiter.LimitRate(request_id, 10, 2)
+
+		if !limit {
+			fmt.Fprintf(w, "Rate limit exceeded")
+			return
+		}
 		handleUpload(w, r, pool)
 	})).Methods("POST")
 
 	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		request_id := r.Header.Get("X-Request-Id")
 		limit := rate_limiter.LimitRate(request_id, 10, 2)
+
 		if !limit {
 			fmt.Fprintf(w, "Rate limit exceeded")
+			return
 		}
 		handleGet(w, r, pool)
 	})).Methods("GET")
@@ -37,7 +47,7 @@ func handleGet(w http.ResponseWriter, r *http.Request, p *jobqueue.Pool) {
 	queueName := r.URL.Hostname()
 	queue := jobqueue.NewQueue(queueName, p.MAX_SIZE)
 	jobs := []jobqueue.Job{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 3; i++ {
 		job := jobqueue.Job{
 			Name: uuid.New().String(),
 			Action: func() error {
