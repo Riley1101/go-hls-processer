@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-    
 )
 
 type Job struct {
 	Name      string
 	Completed bool `default:"false"`
-    Action    func() error
+	Action    func() error
 }
 
 func (j Job) GetName() string {

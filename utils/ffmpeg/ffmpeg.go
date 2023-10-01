@@ -21,6 +21,10 @@ type Video struct {
 	resolution VideoResolution
 }
 
+func (v *Video) GetResolution() VideoResolution {
+	return v.resolution
+}
+
 func NewVideo(file *src.File, resolution VideoResolution) *Video {
 	return &Video{
 		file:       file,
@@ -28,17 +32,20 @@ func NewVideo(file *src.File, resolution VideoResolution) *Video {
 	}
 }
 
-func (v *Video) CreateHLS(resolution VideoResolution) error {
+func (v *Video) CreateHLS() error {
 	scale := fmt.Sprintf("scale=%s", "640:360")
-	switch resolution {
+	switch v.resolution {
 	case LOW:
 		v.resolution = LOW
+		fmt.Println("How did switch even works", v.resolution)
 		scale = fmt.Sprintf("scale=%s", "640:360")
 	case MID:
 		v.resolution = MID
+		fmt.Println("How did switch even works", v.resolution)
 		scale = fmt.Sprintf("scale=%s", "1280:720")
 	case HIGH:
 		v.resolution = HIGH
+		fmt.Println("How did switch even works", v.resolution)
 		scale = fmt.Sprintf("scale=%s", "1920:1080")
 	default:
 		v.resolution = LOW
