@@ -3,36 +3,33 @@ package api
 import (
 	"database/sql"
 	"fmt"
-	uuid "github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
+	"time"
 	config "vid/config"
 	src "vid/src"
-	rate_limiter "vid/utils"
+	"vid/utils"
 	ffmpeg "vid/utils/ffmpeg"
 	jobqueue "vid/utils/jobqueue"
+
+	uuid "github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
 	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
-
-		request_id := r.Header.Get("X-Request-Id")
-		limit := rate_limiter.LimitRate(request_id, 10, 2)
-
-		if !limit {
-			fmt.Fprintf(w, "Rate limit exceeded")
+		valid := utils.NewRequestValidator(w, r)
+		isValid := valid.ValidateRequest()
+		if !isValid {
 			return
 		}
 		handleUpload(w, r, pool)
 	})).Methods("POST")
 
 	r.HandleFunc("/api/upload", config.WithLogMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		request_id := r.Header.Get("X-Request-Id")
-		limit := rate_limiter.LimitRate(request_id, 10, 2)
-
-		if !limit {
-			fmt.Fprintf(w, "Rate limit exceeded")
+		valid := utils.NewRequestValidator(w, r)
+		isValid := valid.ValidateRequest()
+		if !isValid {
 			return
 		}
 		handleGet(w, r, pool)
@@ -40,6 +37,13 @@ func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
 }
 
 func alphabets(name string) error {
+	fmt.Println("<-------------- GENERATING UNIQUE ID ------------------->")
+	for _, char := range name {
+		fmt.Printf("%c", char)
+		// print1 secs
+		time.Sleep(100 * time.Millisecond)
+	}
+	fmt.Println("\n <-------------- UNIQUE ID ENDS ------------------->")
 	return nil
 }
 
@@ -52,6 +56,7 @@ func handleGet(w http.ResponseWriter, r *http.Request, p *jobqueue.Pool) {
 			Name: uuid.New().String(),
 			Action: func() error {
 				var uuid string = uuid.New().String()
+				//wait
 				return alphabets(uuid)
 			},
 		}
@@ -103,7 +108,6 @@ func handleUpload(w http.ResponseWriter, r *http.Request, q *jobqueue.Pool) {
 	queueName := r.URL.Hostname()
 	queue := jobqueue.NewQueue(queueName, q.MAX_SIZE)
 	queue.AddJobs(jobs)
-
 	defaultWorker := jobqueue.NewWorker(queue)
 	q.AddWorker(defaultWorker)
 	q.Start()

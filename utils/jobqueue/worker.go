@@ -15,18 +15,20 @@ func NewWorker(queue *Queue) *Worker {
 }
 
 func (w *Worker) DoWork() bool {
-	for {
-		select {
-		case <-w.Queue.ctx.Done():
-			return true
-		case job := <-w.Queue.jobs:
-			err := job.Run()
-			if err != nil {
-				log.Print(err)
-				continue
+	// run all the jobs in the Queue
+	for _, job := range w.Queue.GetJobs() {
+		go func(job chan Job) {
+			for {
+				select {
+				case <-w.Queue.ctx.Done():
+					log.Print("Queue is done")
+					w.Queue.RemoveJob(job)
+					return
+				case job := <-job:
+					job.Run(w.Queue)
+				}
 			}
-		default:
-			return true
-		}
+		}(job)
 	}
+	return true
 }

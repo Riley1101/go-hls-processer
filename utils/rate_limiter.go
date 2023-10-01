@@ -7,6 +7,22 @@ import (
 	config "vid/config"
 )
 
+func TokenBucket(user_id string, interval_in_seconds int64, maximumRequests int64) bool {
+	now := time.Now().Unix()
+	ctx := context.Background()
+	currentWindow := strconv.FormatInt(now/interval_in_seconds, 10)
+	key := user_id + ":" + currentWindow
+	redisClient := config.ConnectRedis()
+	value, _ := redisClient.Get(ctx, key).Result()
+	requestCountCurrentWindow, _ := strconv.ParseInt(value, 10, 64)
+	if requestCountCurrentWindow >= maximumRequests {
+		// drop request
+		return false
+	}
+	redisClient.Incr(ctx, user_id+":"+currentWindow)
+	return true
+}
+
 func LimitRate(user_id string, interval_in_seconds int64, maximumRequests int64) bool {
 	now := time.Now().Unix()
 	ctx := context.Background()
