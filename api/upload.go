@@ -11,7 +11,6 @@ import (
 	"vid/utils"
 	ffmpeg "vid/utils/ffmpeg"
 	jobqueue "vid/utils/jobqueue"
-
 	uuid "github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
