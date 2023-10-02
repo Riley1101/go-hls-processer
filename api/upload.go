@@ -21,6 +21,7 @@ func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
 		valid := utils.NewRequestValidator(w, r)
 		isValid := valid.ValidateRequest()
 		if !isValid {
+			fmt.Fprintf(w, "Invalid Request")
 			return
 		}
 		handleUpload(w, r, pool)
@@ -30,6 +31,7 @@ func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
 		valid := utils.NewRequestValidator(w, r)
 		isValid := valid.ValidateRequest()
 		if !isValid {
+			fmt.Fprintf(w, "Invalid Request")
 			return
 		}
 		handleGet(w, r, pool)
