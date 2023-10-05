@@ -85,8 +85,9 @@ func handleUpload(w http.ResponseWriter, r *http.Request, q *jobqueue.Pool) {
 	}
 	src.ValidateDir("uploads")
 	file.Upload(multipart_file)
-	jobs := []jobqueue.Job{}
 
+	file.GenerateHLSFile()
+	jobs := []jobqueue.Job{}
 	for _, resolution := range []ffmpeg.VideoResolution{ffmpeg.LOW, ffmpeg.MID, ffmpeg.HIGH} {
 		video := ffmpeg.NewVideo(&file, resolution)
 		newAction := func() error {

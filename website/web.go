@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
+	"os"
 )
 
 func WebRoutes(r *mux.Router) {
@@ -16,5 +17,15 @@ func WebRoutes(r *mux.Router) {
 
 func HomeHandler(w http.ResponseWriter, r *http.Request, t *template.Template) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t.Execute(w, nil)
+	processedDir, err := os.ReadDir("processed")
+	if err != nil {
+		panic(err)
+	}
+	var files []string
+	for _, file := range processedDir {
+		files = append(files, file.Name())
+	}
+
+	// send the processed files to the template
+	t.Execute(w, files)
 }

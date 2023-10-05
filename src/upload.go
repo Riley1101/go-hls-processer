@@ -49,6 +49,28 @@ func (f *File) Upload(file multipart.File) error {
 	return nil
 }
 
+func (f *File) GenerateHLSFile() {
+	ValidateDir("processed/" + f.Filename)
+	contents := fmt.Sprintf(`#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=375000,RESOLUTION=640x360
+./low/playlist.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720
+./mid/playlist.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=3500000,RESOLUTION=1920x1080
+./high/playlist.m3u8
+`)
+	file, err := os.Create(fmt.Sprintf("processed/%s/video.m3u8", f.Filename))
+	if err != nil {
+		slog.Error("Error Creating HLS File",
+			"error", err,
+		)
+	}
+	file.WriteString(contents)
+	defer file.Close()
+	slog.Info("HLS File Created")
+
+}
+
 func ValidateDir(dir string) error {
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {

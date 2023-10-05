@@ -3,7 +3,6 @@
   <head>
     <title></title>
     <meta charset="UTF-8" />
-
     <link
       defer
       href="https://vjs.zencdn.net/8.5.2/video-js.css"
@@ -12,26 +11,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,"></script>
   </head>
-  <body class="w-full p-4 h-screen grid">
+  <body class="w-full p-4 h-screen grid grid-cols-1 md:grid-cols-[80%,20%] gap-4">
     <div class="w-full h-full border rounded-md p-4">
       <video
         id="player"
         width="960"
         height="540"
-        class="video-js vjs-default-skin"
+        class="w-full h-full"
         controls
       >
-        <source
-          src="http://localhost:5173/1695925200637088203/playlist.m3u8"
-          type="application/x-mpegURL"
-        />
+        <source id="videoSource" src="" type="application/x-mpegURL" />
       </video>
     </div>
-    <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+    <ul class="border rounded-md p-4">
+      {{range .}}
+      <button id="thumbnails" class="hover:text-blue-500">{{.}}</button>
+      {{end}}
+    </ul>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   </body>
 
   <script>
-    var player = videojs("player");
-    player.play();
+    var id = document.getElementById("videoSource");
+    var thumbnails = document.querySelectorAll("#thumbnails");
+    var player = document.getElementById("player");
+    thumbnails.forEach((thumbnail) => {
+      thumbnail.addEventListener("click", changeSource);
+    });
+    function changeSource() {
+      let src = this.innerText;
+      let videopath = window.location.href + src + "/video.m3u8";
+
+      var hls = new Hls();
+      hls.loadSource(videopath);
+      hls.attachMedia(player);
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        player.play();
+      });
+    }
   </script>
 </html>
