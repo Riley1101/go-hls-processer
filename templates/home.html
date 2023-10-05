@@ -11,17 +11,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,"></script>
   </head>
-  <body class="w-full p-4 h-screen grid grid-cols-1 md:grid-cols-[80%,20%] gap-4">
+  <body
+    class="w-full p-4 h-screen grid grid-cols-1 md:grid-cols-[80%,20%] gap-4"
+  >
     <div class="w-full h-full border rounded-md p-4">
       <video
         id="player"
         width="960"
         height="540"
-        class="w-full h-full"
+        class="w-full h-full aspect-video"
         controls
       >
         <source id="videoSource" src="" type="application/x-mpegURL" />
       </video>
+    </div>
+    <div>
+      <iframe
+        src="https://deadsimplechat.com/j9bDtBqHo"
+        class="w-full h-full"
+      ></iframe>
     </div>
     <ul class="border rounded-md p-4">
       {{range .}}
@@ -29,6 +37,7 @@
       {{end}}
     </ul>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
   </body>
 
   <script>
