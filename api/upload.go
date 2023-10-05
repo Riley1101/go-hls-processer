@@ -73,6 +73,7 @@ func handleGet(w http.ResponseWriter, r *http.Request, p *jobqueue.Pool) {
 func handleUpload(w http.ResponseWriter, r *http.Request, q *jobqueue.Pool) {
 	r.ParseMultipartForm(10 << 20)
 	multipart_file, file_headers, err := r.FormFile("file")
+
 	if err != nil {
 		slog.Error("Error Retrieving the File")
 		return
