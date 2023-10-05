@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	uuid "github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	"time"
@@ -11,8 +13,6 @@ import (
 	"vid/utils"
 	ffmpeg "vid/utils/ffmpeg"
 	jobqueue "vid/utils/jobqueue"
-	uuid "github.com/google/uuid"
-	"github.com/gorilla/mux"
 )
 
 func UploadRoutes(r *mux.Router, db *sql.DB, pool *jobqueue.Pool) {
